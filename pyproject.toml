@@ -1,0 +1,15 @@
+[project]
+name = "promotoria-ia"
+version = "0.1.0"
+description = "Biblioteca de skills de apoio ao trabalho na promotoria."
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "pymupdf>=1.28.2",
+    "python-docx>=1.2.0",
+]
+
+[tool.uv]
+# Projeto gerido pelo uv apenas para dependências/ambiente das skills — não é um
+# pacote Python a ser construído/instalado. Por isso não há [build-system] nem src/.
+package = false

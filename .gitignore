@@ -1,0 +1,29 @@
+# Ambiente virtual Python (uv)
+.venv/
+venv/
+env/
+
+# Cache Python
+__pycache__/
+*.pyc
+
+# Configurações locais do Claude Code (permissões/segredos do usuário)
+.claude/settings.local.json
+
+# Dados sigilosos do pipeline (origens, texto extraído e artefatos gerados) — sigilo
+# processual. Nunca remova estas entradas: elas permitem compartilhar as skills sem expor
+# processos. As pastas são planas e compartilhadas por todas as skills:
+#   input/  → PDFs e .docx de origem
+#   md/     → texto extraído (Markdown) dos autos
+#   output/ → artefatos gerados pelas skills
+input/*
+!input/.gitkeep
+md/*
+!md/.gitkeep
+output/*
+!output/.gitkeep
+
+# Exemplos de estilo das skills = casos REAIS (sigilosos). Não vão para o GitHub; apenas
+# a pasta é preservada (via .gitkeep) para que a skill saiba onde procurá-los localmente.
+.claude/skills/**/exemplos/*
+!.claude/skills/**/exemplos/.gitkeep
