@@ -5,6 +5,7 @@ description = "Biblioteca de skills de apoio ao trabalho na promotoria."
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "faster-whisper>=1.2.0",
     "pymupdf>=1.28.2",
     "python-docx>=1.2.0",
 ]

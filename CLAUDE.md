@@ -10,13 +10,13 @@ Todo o trabalho segue um **pipeline de três estágios** com pastas **planas e c
 na raiz do repositório:
 
 ```
-input/   (PDFs e .docx de origem)  →  [extração]  →  md/  (texto em Markdown)  →  [skills]  →  output/ (.md)
+input/   (PDFs, .docx e mídias)  →  [extração]  →  md/  (texto em Markdown)  →  [skills]  →  output/ (.md)
 ```
 
-- **`input/`** — os documentos de origem (PDFs dos autos e `.docx` de peças), sem subpastas.
-- **`md/`** — o **texto extraído** de cada origem, em Markdown, com **nome-base espelhado**
-  (`123.pdf` → `md/123.md`; `peca.docx` → `md/peca.md`). O texto é extraído **uma única vez**
-  e reaproveitado por qualquer skill — é o que economiza tokens e centraliza o OCR.
+- **`input/`** — documentos e mídias de origem (PDF, `.docx`, áudio e vídeo), sem subpastas.
+- **`md/`** — o conteúdo extraído em Markdown, com nome-base espelhado para documentos
+  (`123.pdf` → `md/123.md`; `peca.docx` → `md/peca.md`) e sufixo próprio para transcrições
+  (`123.mp4` → `md/123-transcricao.md`). O conteúdo é extraído **uma única vez**.
 - **`output/`** — os artefatos gerados pelas skills, sempre em `.md`, também com nome-base
   espelhado (`md/123.md` → `output/123.md`).
 
@@ -25,6 +25,9 @@ input/   (PDFs e .docx de origem)  →  [extração]  →  md/  (texto em Markdo
 - **PDFs** → skill `extrator-pdf` (`.claude/skills/extrator-pdf/`), que avalia cada página e
   usa Tesseract quando houver menos de 300 caracteres de texto nativo.
 - **`.docx`** → script `extrair_texto.py` (da `resumidor-pecas`), que grava direto em `md/`.
+- **Áudio e vídeo** → skill `transcrever-midia` (`.claude/skills/transcrever-midia/`), que extrai
+  o áudio com FFmpeg e transcreve localmente com faster-whisper em
+  `md/<base>-transcricao.md`, sem colidir com o Markdown do PDF.
 
 **As skills nunca leem o PDF/`.docx` direto: consomem sempre o `md/<base>.md`.** Se o MD ainda
 não existir, rode antes o estágio de extração.
@@ -45,9 +48,13 @@ Todas leem o texto em `md/<base>.md`. Quanto à **saída** no `output/` plano, n
 
 - **`extrator-pdf`** (`.claude/skills/extrator-pdf/`) — extrai cada PDF de `input/` para
   `md/`, página por página, usando Tesseract nas páginas com menos de 300 caracteres.
+- **`transcrever-midia`** (`.claude/skills/transcrever-midia/`) — transcreve localmente arquivos
+  de áudio e vídeo de `input/` para `md/<base>-transcricao.md`, com timestamps e metadados de
+  associação, usando FFmpeg e faster-whisper.
 - **`alegacoes-finais`** (`.claude/skills/alegacoes-finais/`) — redige minuta de alegações
-  finais em ação penal a partir do texto dos autos. Grava `output/<base>-alegacoes-finais.md`
-  (sufixo, não o nome-base puro — ver Convenções).
+  finais em ação penal analisando conjuntamente `md/<base>.md` e todas as
+  `md/*-transcricao.md` associadas ao processo pelo CNJ. Uma transcrição nunca é tratada como auto
+  independente. Grava `output/<base>-alegacoes-finais.md`.
 - **`analisar-flagrante`** (`.claude/skills/analisar-flagrante/`) — analisa autos de prisão
   em flagrante e gera um relatório estruturado por auto. Grava `output/<base>-flagrante.md`
   (sufixo, não o nome-base puro — ver Convenções).
@@ -87,17 +94,21 @@ Todas leem o texto em `md/<base>.md`. Quanto à **saída** no `output/` plano, n
 O pipeline tem **dois estágios idempotentes**. Este é o padrão do projeto e vale também para
 as skills futuras:
 
-- **Estágio de extração (input → md):** para cada origem em `input/`, produz `md/<base>.md`.
-  **Pula** origens cujo `md/<base>.md` já exista.
+- **Estágio de extração (input → md):** PDFs e `.docx` produzem `md/<base>.md`; mídias produzem
+  `md/<base>-transcricao.md`. **Pula** origens cuja saída correspondente já exista.
 - **Estágio de skill (md → output):** a skill consome sempre o `md/<base>.md` (nunca o
   PDF/`.docx` direto). Se o usuário não apontar arquivo(s) específico(s), processa **todos** os
   `md/*.md`, gerando **um artefato por origem** (nunca consolide vários processos num só
   artefato). **Pula** os que já tiverem a **sua própria** saída — cada skill afere a idempotência
   contra o nome que ela mesma grava: `output/<base>.md` para o `esquematizar-processos`;
   `output/<base>-<nome-da-skill>.md` para as demais skills do fluxo dos autos.
+- **Transcrições não são autos:** arquivos `md/*-transcricao.md` ou com
+  `tipo_documento: transcricao_midia` são fontes complementares. Não entram no lote como processos
+  independentes; `alegacoes-finais` associa-os pelo CNJ e os analisa com o auto correspondente.
 - **Nome-base espelhado em toda a cadeia:** `123.pdf` → `md/123.md` → `output/123.md`
   (`esquematizar-processos`) ou `output/123-<skill>.md` (demais). É isso que torna a
-  correspondência origem↔extração↔saída inequívoca.
+  correspondência origem↔extração↔saída inequívoca. Mídias são a exceção deliberada na extração:
+  usam `md/<base>-transcricao.md` para coexistir com o auto.
 - **Restrição do `output/` plano (importante):** como `output/` é plano e todas as skills geram
   `.md`, o espaço de nomes é único. Para evitar colisão no fluxo dos autos, **apenas o
   `esquematizar-processos` grava no nome-base puro** `output/<base>.md` (relatório canônico); todas

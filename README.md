@@ -17,14 +17,15 @@ reutilizá-lo em qualquer skill, economizando tokens e centralizando o reconheci
 Todo o trabalho segue três estágios, com pastas **planas e compartilhadas** na raiz:
 
 ```
-input/                 md/                      output/
-(PDFs e .docx)   →   (texto em Markdown)   →   (.md gerados)
+input/                         md/                      output/
+(PDFs, .docx e mídias)   →   (texto em Markdown)   →   (.md gerados)
   origem          extração (uma vez)          skills
 ```
 
-- **`input/`** — documentos de origem (PDFs dos autos e `.docx` de peças), sem subpastas.
-- **`md/`** — o **texto extraído** de cada origem, em Markdown, com **nome-base espelhado**
-  (`123.pdf` → `md/123.md`). Extraído uma única vez e reaproveitado por qualquer skill.
+- **`input/`** — documentos e mídias de origem (PDF, `.docx`, áudio e vídeo), sem subpastas.
+- **`md/`** — o conteúdo extraído em Markdown, com nome-base espelhado para documentos
+  (`123.pdf` → `md/123.md`) e sufixo próprio para transcrições
+  (`123.mp4` → `md/123-transcricao.md`).
 - **`output/`** — os artefatos gerados pelas skills, em `.md` (ver
   [convenção de nomes](#convenção-de-nomes-de-saída)).
 
@@ -36,6 +37,9 @@ uma origem ainda não existir, rode antes o estágio de extração.
 - **PDFs** → skill [`extrator-pdf`](.claude/skills/extrator-pdf/SKILL.md), que avalia cada página
   e usa **Tesseract OCR** quando houver menos de 300 caracteres de texto nativo.
 - **`.docx`** → script `extrair_texto.py` (da skill `resumidor-pecas`), que grava direto em `md/`.
+- **Áudio e vídeo** → skill [`transcrever-midia`](.claude/skills/transcrever-midia/SKILL.md), que
+  extrai o áudio com **FFmpeg** e o transcreve localmente com **faster-whisper** em
+  `md/<base>-transcricao.md`, sem colidir com o Markdown do PDF.
 
 ## Skills disponíveis
 
@@ -49,7 +53,7 @@ Todas leem `md/<base>.md`. O **fluxo dos autos** (nome-base = número CNJ do pro
 |---|---|---|
 | [`esquematizar-processos`](.claude/skills/esquematizar-processos/) | Extrai e organiza os fatos dos autos: resumo do fato, pessoas e ações, provas técnicas (com `fls.`), linha do tempo e análise de confiança. **Relatório canônico** consumido pela denúncia. | `output/<base>.md` |
 | [`analisar-flagrante`](.claude/skills/analisar-flagrante/) | Analisa autos de prisão em flagrante e gera um relatório estruturado por auto (por indiciado). | `output/<base>-flagrante.md` |
-| [`alegacoes-finais`](.claude/skills/alegacoes-finais/) | Redige minuta de alegações finais (memoriais) em ação penal. | `output/<base>-alegacoes-finais.md` |
+| [`alegacoes-finais`](.claude/skills/alegacoes-finais/) | Analisa conjuntamente os autos e as transcrições de mídia associadas pelo CNJ para redigir as alegações finais. | `output/<base>-alegacoes-finais.md` |
 | [`denuncia`](.claude/skills/denuncia/) | **Etapa opcional.** Redige a denúncia criminal a partir do relatório do `esquematizar-processos` (fonte primária das `fls.`). Só roda a **pedido expresso**. | `output/<base>-denuncia.md` |
 
 Fora do fluxo dos autos:
@@ -58,16 +62,27 @@ Fora do fluxo dos autos:
 |---|---|---|
 | [`resumidor-pecas`](.claude/skills/resumidor-pecas/) | Lê peças processuais avulsas e gera, para cada uma, um `.md` com frontmatter (origem, tipo, resumo) + texto integral, além de um `indice.md` consolidado para disclosure progressivo. | `output/<peça>.md` + `output/indice.md` |
 | [`extrair-teses-juridicas`](.claude/skills/extrair-teses-juridicas/) | Extrai teses jurídicas autônomas e reaproveitáveis de peças, remove os dados do caso concreto e gera notas Obsidian com YAML, tags e wikilinks. | `output/<base>-teses.md` |
+| [`transcrever-midia`](.claude/skills/transcrever-midia/) | Transcreve localmente áudio e vídeo com FFmpeg e faster-whisper, incluindo timestamps e metadados de associação. | `md/<base>-transcricao.md` |
 
 ## Como usar
 
 As skills são acionadas por **linguagem natural** — o Claude Code reconhece o pedido e dispara a
-skill certa. Rodar **em lote** significa não apontar arquivo específico: a skill processa todos os
-`md/*.md` sem saída correspondente e pula os já feitos.
+skill certa. Rodar **em lote** significa não apontar arquivo específico: a skill classifica os
+artefatos aplicáveis em `md/`, processa os que ainda não têm saída e pula os já feitos.
 
 Comece pela extração (se ainda houver só PDFs em `input/`):
 
 > Extraia o texto de todos os PDFs de `input/` para `md/`.
+
+Para transcrever todas as mídias ainda não processadas:
+
+> Transcreva localmente os áudios e vídeos de `input/` para `md/`.
+
+Para extrair um processo e sua audiência e usar ambos na mesma minuta, mantenha o número CNJ nos
+nomes, por exemplo `input/1502524-61.2024.8.26.0599.pdf` e
+`input/1502524-61.2024.8.26.0599-audiencia.mp4`, e peça:
+
+> Elabore as alegações finais considerando os autos e a mídia correspondente.
 
 Depois, exemplos de acionamento em lote:
 
@@ -111,8 +126,8 @@ output/<base>-denuncia.md            ← denuncia
 
 O pipeline tem **dois estágios idempotentes** (padrão obrigatório do projeto):
 
-- **Extração (input → md):** para cada origem em `input/`, produz `md/<base>.md`; **pula** origens
-  que já tenham `md/<base>.md`.
+- **Extração (input → md):** documentos produzem `md/<base>.md`; mídias produzem
+  `md/<base>-transcricao.md`. O estágio **pula** origens que já tenham sua saída correspondente.
 - **Skill (md → output):** processa todos os `md/*.md` sem a saída correspondente, gerando **um
   artefato por origem** (nunca consolida vários processos num só); **pula** os que já tiverem a
   **sua própria** saída. Cada skill afere a idempotência contra o nome que **ela mesma** grava —
@@ -124,7 +139,7 @@ Reprocessar exige pedido explícito (ou apontar o arquivo, que a skill então so
 
 ```
 .
-├── input/                 # origens (PDF/.docx) — sigiloso, fora do Git
+├── input/                 # origens (PDF/.docx/áudio/vídeo) — sigiloso, fora do Git
 ├── md/                    # texto extraído — sigiloso, fora do Git
 ├── output/                # artefatos gerados — sigiloso, fora do Git
 ├── .claude/
@@ -132,6 +147,7 @@ Reprocessar exige pedido explícito (ou apontar o arquivo, que a skill então so
 │   │   └── extrator-pdf.md         # compatibilidade com chamadas antigas
 │   └── skills/
 │       ├── extrator-pdf/           # extração página a página + Tesseract OCR
+│       ├── transcrever-midia/       # transcrição local com FFmpeg + faster-whisper
 │       ├── extrair-teses-juridicas/# teses sanitizadas em notas Obsidian
 │       ├── esquematizar-processos/
 │       ├── analisar-flagrante/
@@ -153,7 +169,8 @@ Cada skill vive em `.claude/skills/<nome>/` com seu `SKILL.md` e assets:
 
 O projeto usa [`uv`](https://docs.astral.sh/uv/) para gerir o ambiente. As dependências estão no
 `pyproject.toml` (`pymupdf`, usada pelo `extrator-pdf`; `python-docx`, usada pela
-`resumidor-pecas`).
+`resumidor-pecas`; `faster-whisper`, usada pelo `transcrever-midia`). FFmpeg e Tesseract são
+executáveis do sistema e precisam estar no `PATH` para as respectivas skills.
 
 - Adicionar dependência: `uv add <pacote>`
 - Executar scripts: `uv run python <caminho-do-script> ...` — o `uv run` cria/sincroniza o
