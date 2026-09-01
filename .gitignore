@@ -7,6 +7,12 @@ env/
 __pycache__/
 *.pyc
 
+# Caches locais do uv
+.uv-cache*/
+
+# Pesos de modelos baixados localmente
+models/
+
 # Configurações locais do Claude Code (permissões/segredos do usuário)
 .claude/settings.local.json
 
