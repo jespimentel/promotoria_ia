@@ -33,11 +33,15 @@ uma origem ainda não existir, rode antes o estágio de extração.
 
 ### Estágio de extração (produz o `md/`)
 
-- **PDFs** → agente [`extrator-pdf`](.claude/agents/extrator-pdf.md), que faz **OCR** quando a
-  página é imagem escaneada.
+- **PDFs** → skill [`extrator-pdf`](.claude/skills/extrator-pdf/SKILL.md), que avalia cada página
+  e usa **Tesseract OCR** quando houver menos de 300 caracteres de texto nativo.
 - **`.docx`** → script `extrair_texto.py` (da skill `resumidor-pecas`), que grava direto em `md/`.
 
 ## Skills disponíveis
+
+O estágio de entrada é a skill [`extrator-pdf`](.claude/skills/extrator-pdf/): ela converte
+`input/<base>.pdf` em `md/<base>.md`, página por página, recorrendo ao Tesseract abaixo do limiar
+de 300 caracteres.
 
 Todas leem `md/<base>.md`. O **fluxo dos autos** (nome-base = número CNJ do processo) reúne:
 
@@ -122,8 +126,9 @@ Reprocessar exige pedido explícito (ou apontar o arquivo, que a skill então so
 ├── output/                # artefatos gerados — sigiloso, fora do Git
 ├── .claude/
 │   ├── agents/
-│   │   └── extrator-pdf.md         # estágio de extração (OCR)
+│   │   └── extrator-pdf.md         # compatibilidade com chamadas antigas
 │   └── skills/
+│       ├── extrator-pdf/           # extração página a página + Tesseract OCR
 │       ├── esquematizar-processos/
 │       ├── analisar-flagrante/
 │       ├── alegacoes-finais/

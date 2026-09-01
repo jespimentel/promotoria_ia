@@ -22,8 +22,8 @@ input/   (PDFs e .docx de origem)  →  [extração]  →  md/  (texto em Markdo
 
 **Estágio de extração** (produz o `md/`):
 
-- **PDFs** → agente `extrator-pdf` (`.claude/agents/extrator-pdf.md`), que faz OCR quando a
-  página é imagem.
+- **PDFs** → skill `extrator-pdf` (`.claude/skills/extrator-pdf/`), que avalia cada página e
+  usa Tesseract quando houver menos de 300 caracteres de texto nativo.
 - **`.docx`** → script `extrair_texto.py` (da `resumidor-pecas`), que grava direto em `md/`.
 
 **As skills nunca leem o PDF/`.docx` direto: consomem sempre o `md/<base>.md`.** Se o MD ainda
@@ -43,6 +43,8 @@ Todas leem o texto em `md/<base>.md`. Quanto à **saída** no `output/` plano, n
   não o número do processo): grava `output/<peça>.md` + um `indice.md` consolidado; não colide com
   o fluxo dos autos.
 
+- **`extrator-pdf`** (`.claude/skills/extrator-pdf/`) — extrai cada PDF de `input/` para
+  `md/`, página por página, usando Tesseract nas páginas com menos de 300 caracteres.
 - **`alegacoes-finais`** (`.claude/skills/alegacoes-finais/`) — redige minuta de alegações
   finais em ação penal a partir do texto dos autos. Grava `output/<base>-alegacoes-finais.md`
   (sufixo, não o nome-base puro — ver Convenções).
@@ -111,7 +113,7 @@ as skills futuras:
 
 O projeto usa **`uv`** para gerir o ambiente. As dependências ficam no `pyproject.toml`
 (ex.: `python-docx`, usada pela `resumidor-pecas` para ler `.docx`; `pymupdf`, usada pelo
-agente `extrator-pdf`).
+skill `extrator-pdf`).
 
 - Adicionar dependência: `uv add <pacote>`.
 - Executar scripts: `uv run python <caminho-do-script> ...` — o `uv run` cria/sincroniza o

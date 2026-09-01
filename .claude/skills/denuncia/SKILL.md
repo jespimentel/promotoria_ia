@@ -1,6 +1,6 @@
 ---
 name: denuncia
-description: 'Redige uma denúncia criminal (peça acusatória) a partir do relatório esquemático em output/<base>.md (produzido pelo esquematizar-processos, fonte primária dos fatos e das fls.), usando md/<base>.md apenas para conferir números exatos e como fallback, e grava output/<base>-denuncia.md. É a segunda etapa, OPCIONAL, do fluxo: só acione quando o usuário pedir expressamente para redigir/minutar a denúncia (ex.: "elabore a denúncia", "minute a peça acusatória", "capitule e ofereça denúncia", "denuncie o investigado"). NÃO acione automaticamente após uma análise. Use quando o pedido envolver redação de denúncia, capitulação penal, rol de testemunhas, rito ou pedido de reparação (art. 387, IV, CPP).'
+description: 'Redige uma denúncia criminal (peça acusatória) a partir do relatório esquemático em output/BASE.md (produzido pelo esquematizar-processos, fonte primária dos fatos e das fls.), usando md/BASE.md apenas para conferir números exatos e como fallback, e grava output/BASE-denuncia.md. É a segunda etapa, OPCIONAL, do fluxo: só acione quando o usuário pedir expressamente para redigir/minutar a denúncia (ex.: "elabore a denúncia", "minute a peça acusatória", "capitule e ofereça denúncia", "denuncie o investigado"). NÃO acione automaticamente após uma análise. Use quando o pedido envolver redação de denúncia, capitulação penal, rol de testemunhas, rito ou pedido de reparação (art. 387, IV, CPP).'
 ---
 
 # Skill: Elaboração de Denúncia Criminal
@@ -74,6 +74,13 @@ denúncia — os exemplos são reais e sigilosos e servem só para você enxerga
 - Proibido preencher lacunas com inferências ou suposições.
 
 ## Regras de redação
+
+### Número do inquérito no cabeçalho
+
+No campo `IP nº`, use sempre o **número CNJ do processo** no formato
+`NNNNNNN-DD.AAAA.J.TR.OOOO`. Não use o número interno do inquérito, IPe, IP UPJ, número do
+procedimento policial ou boletim de ocorrência nesse campo. Se o número CNJ não constar das
+fontes, escreva `IP nº [CONFERIR: número CNJ do processo]`.
 
 ### Rito (ordem de precedência)
 

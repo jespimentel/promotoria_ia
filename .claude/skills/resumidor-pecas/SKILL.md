@@ -51,7 +51,7 @@ para **disclosure progressivo**: o leitor escaneia o índice → abre o `.md` da
 
 A skill consome `md/<base>.md`. Garanta que o texto da peça exista em `md/` antes de resumir:
 
-- **PDF** → rode o agente `extrator-pdf` sobre o `.pdf` em `input/`; ele grava `md/<base>.md`.
+- **PDF** → rode a skill `extrator-pdf` sobre o `.pdf` em `input/`; ela grava `md/<base>.md`.
 - **DOCX** → extraia com o script `scripts/extrair_texto.py` (usa `python-docx`, já no
   `pyproject.toml` da raiz), que grava direto em `md/<base>.md`:
   ```
