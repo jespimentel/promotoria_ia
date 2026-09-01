@@ -62,6 +62,10 @@ Todas leem o texto em `md/<base>.md`. Quanto à **saída** no `output/` plano, n
   de `.docx` ou `.pdf`) e gera, para cada uma, um `.md` com frontmatter (arquivo de origem,
   tipo de peça e resumo em até 4 linhas) seguido do texto integral, além de um `indice.md`
   consolidado para disclosure progressivo.
+- **`extrair-teses-juridicas`** (`.claude/skills/extrair-teses-juridicas/`) — identifica em peças
+  processuais teses jurídicas autônomas e reaproveitáveis, sanitiza os dados do caso concreto e
+  gera notas Obsidian com YAML, tags e wikilinks. Em lote, grava um
+  `output/<base>-teses.md` por origem.
 
 ## Convenções
 
