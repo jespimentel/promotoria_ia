@@ -46,9 +46,14 @@ raciocínio se sustente como tese autônoma.
 
 ## Formato de cada nota
 
-Cada tese deve aparecer em seu próprio bloco cercado, aberto por ```` ```markdown ```` e fechado
-por ```` ``` ````. Não escreva texto de transição entre blocos. O conteúdo interno deve ser
-Markdown puro e utilizável como arquivo `.md` depois da remoção das cercas.
+No staging (`output/<base>-teses.md`), cada tese aparece em seu próprio bloco cercado, aberto
+por ```` ```markdown ```` e fechado por ```` ``` ````. Não escreva texto de transição entre
+blocos. O conteúdo interno deve ser Markdown puro e idêntico ao que vai para a nota final.
+
+Em `output/teses/<arquivo>.md`, grave o mesmo conteúdo sem as cercas: o arquivo começa
+diretamente no `---` do frontmatter. É essa versão solta, sem cerca, que o Obsidian indexa —
+dentro de um bloco de código, wikilinks e frontmatter ficam inertes e nenhuma nota entra no
+grafo.
 
 Dentro do bloco, use frontmatter YAML real, delimitado por `---` em linhas próprias. Mantenha os
 campos exatamente nesta ordem:

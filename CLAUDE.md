@@ -23,7 +23,7 @@ input/   (PDFs, .docx e mídias)  →  [extração]  →  md/  (texto em Markdow
 **Estágio de extração** (produz o `md/`):
 
 - **PDFs** → skill `extrator-pdf` (`.claude/skills/extrator-pdf/`), que avalia cada página e
-  usa Tesseract quando houver menos de 300 caracteres de texto nativo.
+  usa Tesseract quando houver menos de 400 caracteres de texto nativo.
 - **`.docx`** → script `extrair_texto.py` (da `resumidor-pecas`), que grava direto em `md/`.
 - **Áudio e vídeo** → skill `transcrever-midia` (`.claude/skills/transcrever-midia/`), que extrai
   o áudio com FFmpeg e transcreve localmente com faster-whisper em
@@ -47,7 +47,7 @@ Todas leem o texto em `md/<base>.md`. Quanto à **saída** no `output/` plano, n
   o fluxo dos autos.
 
 - **`extrator-pdf`** (`.claude/skills/extrator-pdf/`) — extrai cada PDF de `input/` para
-  `md/`, página por página, usando Tesseract nas páginas com menos de 300 caracteres.
+  `md/`, página por página, usando Tesseract nas páginas com menos de 400 caracteres.
 - **`transcrever-midia`** (`.claude/skills/transcrever-midia/`) — transcreve localmente arquivos
   de áudio e vídeo de `input/` para `md/<base>-transcricao.md`, com timestamps e metadados de
   associação, usando FFmpeg e faster-whisper.
@@ -71,8 +71,12 @@ Todas leem o texto em `md/<base>.md`. Quanto à **saída** no `output/` plano, n
   consolidado para disclosure progressivo.
 - **`extrair-teses-juridicas`** (`.claude/skills/extrair-teses-juridicas/`) — identifica em peças
   processuais teses jurídicas autônomas e reaproveitáveis, sanitiza os dados do caso concreto e
-  gera notas Obsidian com YAML, tags e wikilinks. Em lote, grava um
-  `output/<base>-teses.md` por origem.
+  grava dois artefatos por origem: o staging `output/<base>-teses.md` (um bloco cercado por
+  tese) e, para cada tese, uma nota Obsidian solta (frontmatter YAML, tags e wikilinks) em
+  `output/teses/<arquivo-da-tese>.md` — é essa pasta plana que forma o banco de teses navegável
+  no grafo. **Exceção deliberada** à regra de pastas planas por origem (ver Convenções): como as
+  notas não são "uma por origem" mas "uma por tese", `output/teses/` reúne o banco inteiro,
+  deduplicado por slug.
 
 ## Convenções
 
@@ -83,7 +87,9 @@ Todas leem o texto em `md/<base>.md`. Quanto à **saída** no `output/` plano, n
   - `exemplos/` — casos **reais** completos, usados só como referência de forma/estilo
     (nunca como fonte de fatos). Por serem reais, são **sigilosos** e não vão para o GitHub.
 - **Pastas do pipeline são compartilhadas** (`input/`, `md/`, `output/`, planas — ver seção
-  "Pipeline de pastas"). **Não** crie subpastas por skill.
+  "Pipeline de pastas"). **Não** crie subpastas por skill. Exceção deliberada:
+  `output/teses/` (`extrair-teses-juridicas`), que não indexa por origem, mas por tese — ver a
+  entrada da skill acima.
 - Ao adicionar uma skill nova, repita o padrão: pasta em `.claude/skills/`; ela consome
   `md/<base>.md` e grava em `output/`. **Escolha o nome de saída para não colidir:** no fluxo dos
   autos, `output/<base>.md` é reservado ao relatório canônico do `esquematizar-processos`; qualquer
