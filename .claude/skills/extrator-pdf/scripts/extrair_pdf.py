@@ -20,7 +20,7 @@ except ImportError as exc:  # pragma: no cover - mensagem operacional
     ) from exc
 
 
-LIMIAR_CARACTERES = 300
+LIMIAR_CARACTERES = 400
 SEPARADOR = "\n\n---\n\n"
 
 
@@ -35,7 +35,7 @@ class Resultado:
 
 def argumentos() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Extrai PDFs para Markdown e usa Tesseract em páginas com menos de 300 caracteres."
+        description="Extrai PDFs para Markdown e usa Tesseract em páginas com menos de 400 caracteres."
     )
     parser.add_argument(
         "pdfs",

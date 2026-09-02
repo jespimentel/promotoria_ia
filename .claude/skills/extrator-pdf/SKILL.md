@@ -1,6 +1,6 @@
 ---
 name: extrator-pdf
-description: Extrai, página por página, o texto de PDFs de input/ para Markdown em md/, usando texto nativo quando houver ao menos 300 caracteres e Tesseract OCR nas páginas abaixo desse limiar. Use ao converter, transcrever, ler ou fazer OCR de PDFs.
+description: Extrai, página por página, o texto de PDFs de input/ para Markdown em md/, usando texto nativo quando houver ao menos 400 caracteres e Tesseract OCR nas páginas abaixo desse limiar. Use ao converter, transcrever, ler ou fazer OCR de PDFs.
 ---
 
 # Extração de PDF para Markdown
@@ -24,9 +24,9 @@ reprocessar todo o lote.
 O script aplica obrigatoriamente a decisão a cada página, de forma independente:
 
 1. Extrai o texto nativo com PyMuPDF.
-2. Se o texto, após remover espaços nas extremidades, tiver **300 caracteres ou mais**, grava
+2. Se o texto, após remover espaços nas extremidades, tiver **400 caracteres ou mais**, grava
    esse texto.
-3. Se tiver **menos de 300 caracteres**, renderiza apenas essa página e executa Tesseract.
+3. Se tiver **menos de 400 caracteres**, renderiza apenas essa página e executa Tesseract.
    O texto do Tesseract substitui o texto nativo curto quando o OCR produz conteúdo.
 4. Se o Tesseract terminar com erro ou não produzir texto, preserva o texto nativo que existir
    e insere na página um marcador `OCR PENDENTE`.
