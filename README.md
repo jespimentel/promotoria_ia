@@ -61,7 +61,6 @@ Fora do fluxo dos autos:
 | Skill | O que faz | Saída |
 |---|---|---|
 | [`resumidor-pecas`](.claude/skills/resumidor-pecas/) | Lê peças processuais avulsas e gera, para cada uma, um `.md` com frontmatter (origem, tipo, resumo) + texto integral, além de um `indice.md` consolidado para disclosure progressivo. | `output/<peça>.md` + `output/indice.md` |
-| [`extrair-teses-juridicas`](.claude/skills/extrair-teses-juridicas/) | Extrai teses jurídicas autônomas e reaproveitáveis de peças, remove os dados do caso concreto e gera notas Obsidian com YAML, tags e wikilinks. | `output/<base>-teses.md` |
 | [`transcrever-midia`](.claude/skills/transcrever-midia/) | Transcreve localmente áudio e vídeo com FFmpeg e faster-whisper, incluindo timestamps e metadados de associação. | `md/<base>-transcricao.md` |
 
 ## Como usar
@@ -91,8 +90,6 @@ Depois, exemplos de acionamento em lote:
 > Analise todos os autos de flagrante.
 >
 > Elabore as alegações finais de todos os processos.
->
-> Extraia as teses jurídicas de todos os PDFs em lote.
 
 A **denúncia** depende do relatório do esquematizar, então encadeie:
 
@@ -148,7 +145,6 @@ Reprocessar exige pedido explícito (ou apontar o arquivo, que a skill então so
 │   └── skills/
 │       ├── extrator-pdf/           # extração página a página + Tesseract OCR
 │       ├── transcrever-midia/       # transcrição local com FFmpeg + faster-whisper
-│       ├── extrair-teses-juridicas/# teses sanitizadas em notas Obsidian
 │       ├── esquematizar-processos/
 │       ├── analisar-flagrante/
 │       ├── alegacoes-finais/

@@ -69,14 +69,6 @@ Todas leem o texto em `md/<base>.md`. Quanto à **saída** no `output/` plano, n
   de `.docx` ou `.pdf`) e gera, para cada uma, um `.md` com frontmatter (arquivo de origem,
   tipo de peça e resumo em até 4 linhas) seguido do texto integral, além de um `indice.md`
   consolidado para disclosure progressivo.
-- **`extrair-teses-juridicas`** (`.claude/skills/extrair-teses-juridicas/`) — identifica em peças
-  processuais teses jurídicas autônomas e reaproveitáveis, sanitiza os dados do caso concreto e
-  grava dois artefatos por origem: o staging `output/<base>-teses.md` (um bloco cercado por
-  tese) e, para cada tese, uma nota Obsidian solta (frontmatter YAML, tags e wikilinks) em
-  `output/teses/<arquivo-da-tese>.md` — é essa pasta plana que forma o banco de teses navegável
-  no grafo. **Exceção deliberada** à regra de pastas planas por origem (ver Convenções): como as
-  notas não são "uma por origem" mas "uma por tese", `output/teses/` reúne o banco inteiro,
-  deduplicado por slug.
 
 ## Convenções
 
@@ -87,9 +79,7 @@ Todas leem o texto em `md/<base>.md`. Quanto à **saída** no `output/` plano, n
   - `exemplos/` — casos **reais** completos, usados só como referência de forma/estilo
     (nunca como fonte de fatos). Por serem reais, são **sigilosos** e não vão para o GitHub.
 - **Pastas do pipeline são compartilhadas** (`input/`, `md/`, `output/`, planas — ver seção
-  "Pipeline de pastas"). **Não** crie subpastas por skill. Exceção deliberada:
-  `output/teses/` (`extrair-teses-juridicas`), que não indexa por origem, mas por tese — ver a
-  entrada da skill acima.
+  "Pipeline de pastas"). **Não** crie subpastas por skill.
 - Ao adicionar uma skill nova, repita o padrão: pasta em `.claude/skills/`; ela consome
   `md/<base>.md` e grava em `output/`. **Escolha o nome de saída para não colidir:** no fluxo dos
   autos, `output/<base>.md` é reservado ao relatório canônico do `esquematizar-processos`; qualquer
