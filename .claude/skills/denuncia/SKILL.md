@@ -1,86 +1,82 @@
 ---
 name: denuncia
-description: 'Redige uma denúncia criminal (peça acusatória) a partir do relatório esquemático em output/BASE.md (produzido pelo esquematizar-processos, fonte primária dos fatos e das fls.), usando md/BASE.md apenas para conferir números exatos e como fallback, e grava output/BASE-denuncia.md. É a segunda etapa, OPCIONAL, do fluxo: só acione quando o usuário pedir expressamente para redigir/minutar a denúncia (ex.: "elabore a denúncia", "minute a peça acusatória", "capitule e ofereça denúncia", "denuncie o investigado"). NÃO acione automaticamente após uma análise. Use quando o pedido envolver redação de denúncia, capitulação penal, rol de testemunhas, rito ou pedido de reparação (art. 387, IV, CPP).'
+description: 'Redige uma denúncia criminal (peça acusatória) com base exclusiva no texto do inquérito policial extraído em md/BASE.md, usando as denúncias reais em exemplos/ (indexadas em exemplos/indice.md, para disclosure progressivo) como referência de forma e estilo. Autônoma: não depende do relatório do esquematizar-processos. Grava output/BASE-denuncia.md. Só acione quando o usuário pedir expressamente para redigir/minutar a denúncia (ex.: "elabore a denúncia", "minute a peça acusatória", "capitule e ofereça denúncia", "denuncie o investigado"). NÃO acione automaticamente após uma análise. Use quando o pedido envolver redação de denúncia, capitulação penal, rol de testemunhas, rito ou pedido de reparação (art. 387, IV, CPP).'
 ---
 
 # Skill: Elaboração de Denúncia Criminal
 
-## Papel e etapa
+## Papel
 
-Você é um Promotor de Justiça. Sua tarefa é **redigir uma denúncia criminal** com base exclusiva
-nos fatos já apurados e disponíveis no relatório esquemático (e nos autos que o originaram). Não
-infira fatos, não preencha lacunas criativamente e não incorpore dados externos.
+Você é um Promotor de Justiça. Redija uma denúncia criminal com base **exclusiva** no texto do
+inquérito policial extraído em `md/<base>.md` — nunca leia o PDF/`.docx` original diretamente. Se
+o `md/<base>.md` do auto de interesse ainda não existir, rode antes o `extrator-pdf` sobre o PDF em
+`input/`. Não infira fatos, não preencha lacunas criativamente e não incorpore dados externos.
 
-Esta é a **segunda etapa, opcional**, do fluxo. A primeira (`esquematizar-processos`) extrai os
-fatos do processo para `output/<base>.md`. Esta skill **só roda quando o usuário pede a denúncia**.
-Nunca a execute por iniciativa própria logo após uma análise: o usuário pode querer parar na
-análise.
+Esta skill é **autônoma**: não depende do relatório do `esquematizar-processos`
+(`output/<base>.md`) e pode ser acionada mesmo que ele não exista. Só roda a **pedido expresso** do
+usuário (ex.: "elabore a denúncia", "minute a peça acusatória", "capitule e ofereça denúncia",
+"denuncie o investigado") — nunca por iniciativa própria logo após uma análise.
 
-## Fonte dos fatos (precedência)
+## Base de conhecimento: `exemplos/` e `indice.md` (disclosure progressivo)
 
-1. **Relatório esquemático em `output/<base>.md`** (produzido pelo `esquematizar-processos`) —
-   **fonte primária** dos fatos, das folhas (`fls.`) e das referências. Todos os nomes, datas,
-   locais, provas e `(fls. XX)` da denúncia saem dele.
-2. **`md/<base>.md`** — consulte apenas para **conferir números precisos** (quantidades, massas,
-   valores) e folhas exatas, e como **fallback** quando não houver relatório para o caso.
-3. **Nada disso disponível** — não invente. Se um caso de interesse ainda não tiver relatório,
-   rode antes o `esquematizar-processos` (e o `extrator-pdf`, se faltar o `md/<base>.md`); só então
-   redija. Isso preserva o encadeamento e as folhas.
+A base de conhecimento de **estilo** desta skill é a pasta `exemplos/`: um conjunto de denúncias
+**reais** já oferecidas por este Promotor, sigilosas, indexadas em `exemplos/indice.md`. Esse
+índice é o mecanismo de **disclosure progressivo** — cada entrada traz o nome do arquivo e um
+resumo dos fatos, o que permite localizar o modelo mais próximo do caso sem ler as 49 peças
+integralmente. Fluxo obrigatório:
 
-Quando **tanto o relatório quanto o `md/`** existirem, o relatório governa o conjunto de fatos; o
-`md/` serve só para confirmar números e folhas.
+1. Leia `exemplos/indice.md`.
+2. Compare o resumo dos fatos de cada entrada com o caso em análise — priorize o **mesmo tipo
+   penal**; havendo empate, o **modus operandi** mais semelhante (a comparação nunca é pelo rito:
+   o rito é sempre definido pelo crime real apurado no auto).
+3. Leia **apenas** o `.md` da entrada escolhida e extraia dela a **forma**: o encadeamento dos
+   blocos "Consta...", o bloco único "Apurou-se que", o fraseado da capitulação e do pedido final
+   (inclusive a fórmula exata de notificação/citação e rito) e o formato do rol.
+4. Se nenhuma entrada do índice for aderente ao caso (tipo penal e modus operandi distantes),
+   registre isso na análise preliminar como "material recuperado não aderente" e aplique apenas a
+   estrutura de `templates/denuncia.md`, sem forçar um modelo inadequado.
+5. Informe ao usuário, em uma linha, qual entrada do índice foi usada como referência (ou que
+   nenhuma foi aderente).
 
-## Seleção de casos (lote idempotente)
+**Use apenas a forma.** É proibido incorporar nomes, qualificações, datas, locais, valores ou
+número de IP dos `exemplos/` à peça nova — são casos reais e sigilosos, servem só para você
+enxergar o padrão. Toda matéria fática vem exclusivamente do `md/<base>.md` do caso analisado. A
+forma **cede às regras normativas**: rito, qualificação, concurso, capitulação e reparação sempre
+derivam do crime real apurado no auto, ainda que o modelo recuperado trate de crime diferente.
 
-Esta skill opera **em lote e de forma idempotente**, conforme o padrão do projeto:
+## Estilo e formatação (obrigatórios)
 
-- Se o usuário apontou arquivo(s) específico(s), use-os.
-- Caso contrário, liste os casos cujo **`output/<base>-denuncia.md` ainda não exista** e redija um
-  para cada. A idempotência é contra o sufixo **`-denuncia`** — **não** contra `output/<base>.md`,
-  que é o **relatório-fonte** (jamais o trate como "já processado" nem o sobrescreva).
-- Se faltar o relatório de um caso de interesse, rode antes o `esquematizar-processos`; se faltar
-  o `md/<base>.md`, rode antes o `extrator-pdf` sobre o PDF em `input/`.
+- Tom objetivo, impessoal e técnico. Nomes de denunciados em **CAIXA ALTA**.
+- Linguagem forense, com o verbo nuclear do tipo penal na redação legal (ex.: "trazia consigo,
+  para fins de tráfico"; "subtraiu para si coisa alheia móvel"; "ofendeu a integridade corporal de
+  [vítima], por razões da condição do sexo feminino").
+- Cada afirmação fática remete às folhas do auto (`cf. fls. X`).
+- **Prosa corrida**: a peça não usa marcadores, listas, negrito, títulos, nem linhas em branco
+  entre as orações do pedido final. A **única** lista numerada permitida é o ROL de testemunhas.
+- Vários crimes do **mesmo** denunciado vão na mesma frase do "Diante do exposto", separados por
+  vírgula, encerrando com a forma de concurso (ex.: "incurso nos artigos 129, § 13, e 163, caput,
+  ambos do Código Penal, na forma do art. 69 do Código Penal").
+- Datas por extenso nos parágrafos "Consta..." (ex.: "29 de abril de 2026, por volta das 19 horas
+  e 6 minutos").
 
-## Passo 0 — Modelo de forma a partir do índice local
+## Estrutura narrativa
 
-Antes de redigir, escolha um modelo de referência **de forma** na pasta `exemplos/` desta skill
-(denúncias reais, sigilosas, usadas **só** como referência de forma e estilo — nunca como fonte de
-fatos). **Não há pergunta ao usuário nesta etapa.**
+- Cada parágrafo "Consta..." descreve **uma** conduta (o quê, quando, onde, como, por quem), com
+  remissão às fls. e com o núcleo do tipo penal na redação legal; as circunstâncias concretas
+  ficam ao redor do núcleo.
+- Use "Consta, ainda, que" / "Consta, por fim, que" **apenas** para introduzir imputações
+  distintas (crime diferente, vítima diferente ou episódio autônomo) — nunca para fragmentar a
+  narrativa de uma mesma conduta.
+- Em seguida, abra **um único** bloco "Apurou-se que" — narrativa corrida do modus operandi em 1 a
+  5 parágrafos. **Não repita "Apurou-se"** no início dos parágrafos seguintes, nem fragmente essa
+  narrativa por crime.
+- Cada vítima e cada conduta típica apurada gera uma imputação própria: se, por exemplo, houver
+  lesão contra a esposa e lesão contra a filha, são duas imputações distintas, ambas capituladas. A
+  capitulação final deve refletir **todas** as imputações levantadas na análise preliminar.
 
-1. Leia `exemplos/indice.md`. Cada entrada traz o nome do arquivo e um **resumo dos fatos**.
-2. Compare o caso em análise com o **resumo dos fatos** de cada entrada (não pelo rito — o rito é
-   sempre definido pelo crime real apurado) e identifique o modelo **mais aderente**.
-3. Leia o `.md` do modelo escolhido e infira dele a **forma**: ordem da narrativa, fraseado dos
-   blocos "Consta...", estilo da capitulação e formato do rol.
-4. Se nenhum modelo for perfeitamente aderente, **adapte o mais próximo** (a aderência é sobre
-   **como os fatos se assemelham**, não sobre o rito).
-5. Informe ao usuário, em **uma linha**, qual modelo do índice foi usado como referência.
+### Qualificação
 
-**Use apenas a forma.** Nunca incorpore nomes, datas, locais, valores ou fatos do modelo à
-denúncia — os exemplos são reais e sigilosos e servem só para você enxergar o padrão. A forma
-**cede às regras normativas**: rito, qualificação, concurso, capitulação e reparação derivam
-**sempre do crime real apurado no relatório**, ainda que o modelo trate de crime diferente.
-
-## Restrições inegociáveis (antialucinação)
-
-- Toda informação factual deve vir **exclusivamente** do relatório (e do `md/` que o originou,
-  para conferência) **e dos elementos que o usuário acrescentar expressamente** (ver abaixo).
-  Quando faltar dado essencial e o usuário nada acrescentar, escreva **`[CONFERIR: <o que falta>]`**
-  no local correspondente e liste a pendência ao final.
-- Cite as folhas **exatamente** como aparecem no relatório. Se uma referência necessária não tiver
-  `fls.`, escreva "fls. NÃO INFORMADA" — não invente número de folha.
-- Proibido reproduzir CPF, RG ou endereço residencial no corpo da peça.
-- Proibido incorporar nomes, valores ou fatos dos `exemplos/`.
-- Proibido preencher lacunas com inferências ou suposições.
-
-## Regras de redação
-
-### Número do inquérito no cabeçalho
-
-No campo `IP nº`, use sempre o **número CNJ do processo** no formato
-`NNNNNNN-DD.AAAA.J.TR.OOOO`. Não use o número interno do inquérito, IPe, IP UPJ, número do
-procedimento policial ou boletim de ocorrência nesse campo. Se o número CNJ não constar das
-fontes, escreva `IP nº [CONFERIR: número CNJ do processo]`.
+Use sempre a fórmula **"qualificado a fls. X"**.
 
 ### Rito (ordem de precedência)
 
@@ -90,9 +86,12 @@ fontes, escreva `IP nº [CONFERIR: número CNJ do processo]`.
    - **Ordinário** (pena máx. ≥ 4 anos — art. 394, § 1º, I, CPP): limite de **8** testemunhas.
    - **Sumário** (pena máx. 2–4 anos — art. 394, § 1º, II, CPP): limite de **5** testemunhas.
 
-### Qualificação
-
-Use sempre a fórmula **"qualificado a fls. X"**.
+O rito e o limite de testemunhas acima são regra de lei e nunca cedem ao modelo recuperado. O que
+se importa do modelo é só o **fraseado** da notificação/citação (ex.: "notificado para apresentar
+a defesa prévia no prazo de 10 (dez) dias, seguindo-se com o rito estabelecido pelos artigos 56 e
+seguintes da referida lei" vs. "citado para responder à acusação, seguindo-se o rito estabelecido
+pelos artigos 394 e ss. do Código de Processo Penal") — use a redação que aparece no exemplo
+escolhido, mantendo o rito correto para o crime real apurado.
 
 ### Concurso de crimes
 
@@ -112,22 +111,44 @@ Quando o **mesmo tipo penal** for praticado mais de uma vez em concurso material
 Inclua pedido de reparação nas seguintes hipóteses:
 
 - **Prejuízo patrimonial direto e quantificável** (furto, estelionato, dano, apropriação
-  indébita, incêndio): use o valor documentado no relatório; se não constar, use "a ser apurado em
-  liquidação".
-- **Violência doméstica e familiar contra a mulher**: inclua danos materiais e morais; se não
-  houver valor expresso, fixe patamar mínimo razoável com a fórmula "R$ X.XXX,00 para reparação
-  dos danos materiais e morais".
+  indébita, incêndio): use o valor documentado no auto; se não constar, estime um valor mínimo
+  razoável a partir dos elementos disponíveis.
+- **Violência doméstica e familiar contra a mulher**: inclua **sempre** danos materiais **e**
+  morais e fixe um valor mínimo razoável. **Nunca** use a fórmula "a ser apurado em liquidação"
+  nesses casos.
 - **Crimes sem resultado danoso mensurável** (ex.: ameaça isolada, porte de drogas): **omita** o
   pedido.
 
 Nos casos de concurso material com múltiplos eventos, os juros moratórios contam da data do
 **último** evento criminoso (Súmula 54/STJ); a correção monetária segue a Súmula 362/STJ.
 
+### Laudos pendentes
+
+Se o auto indicar laudo requisitado e ainda não juntado, protesta pela juntada no pedido final,
+citando a fls. em que o laudo foi requisitado (ex.: "protestando, desde já, pela juntada do laudo
+requisitado a fls. X").
+
 ### Rol de testemunhas
 
-Respeite o limite do rito identificado. Formato de cada item: `Nome (categoria, fls. X)`.
-Categorias: **vítima** | **policial req.** | **testemunha**. Se o número de pessoas exceder o
-limite, registre o excedente nas pendências e liste apenas as mais relevantes à prova dos fatos.
+Respeite o limite do rito identificado. Liste em **lista numerada** (a única do documento), no
+formato `N. Nome (categoria, fls. X);`. Categorias: **vítima** | **policial req.** | **testemunha**.
+Se o número de pessoas exceder o limite, registre o excedente na análise preliminar e liste apenas
+as mais relevantes à prova dos fatos.
+
+## Restrições inegociáveis (antialucinação)
+
+- Toda informação factual deve vir **exclusivamente** do `md/<base>.md` do caso analisado **e**
+  dos elementos que o usuário acrescentar expressamente (ver "Elementos adicionais do usuário").
+  Quando faltar dado essencial e o usuário nada acrescentar, escreva **"NÃO CONSTA NOS AUTOS"** no
+  local correspondente e liste a pendência na análise preliminar.
+- Cite as folhas **exatamente** como aparecem no auto. Se uma referência necessária não tiver
+  `fls.`, escreva "fls. NÃO INFORMADA" — não invente número de folha.
+- Proibido reproduzir CPF, RG ou endereço residencial no corpo da peça.
+- **Violência doméstica**: refira-se à vítima pelas **iniciais**, nunca pelo nome completo, em
+  qualquer trecho da peça (ex.: em vez de "Maria das Dores Silva", use "M. D. S."), inclusive no
+  rol de testemunhas e no pedido de reparação.
+- Proibido incorporar nomes, qualificações, datas, locais, valores ou número de IP dos `exemplos/`.
+- Proibido preencher lacunas com inferências ou suposições.
 
 ## Elementos adicionais do usuário
 
@@ -136,28 +157,55 @@ acrescentar ou destacar (uma circunstância, qualificadora/agravante, tese, pedi
 ponto de inclusão obrigatória), trate-o como **diretriz vinculante** e incorpore-o à peça — como o
 usuário é o Promotor responsável, isso é **fonte legítima e complementar**, não "dado externo"
 vedado. Não extrapole o que o usuário disse nem fabrique número de folha para um elemento sem
-`(fls. XX)`. Se um elemento acrescentado **conflitar com o relatório** (ex.: data ou local
+`(fls. XX)`. Se um elemento acrescentado **conflitar com o auto** (ex.: data ou local
 incompatível), **aponte o conflito ao usuário antes de redigir**, em vez de escolher silenciosamente.
 
-## Raciocínio prévio (análise preliminar — não integra a peça)
+## Análise preliminar obrigatória
 
-Antes de redigir cada denúncia, faça internamente o levantamento abaixo (indiciados; vítimas;
-fato e capitulação; rito; concurso; provas relevantes; depoimentos; rol; lacunas). Ele **não** faz
-parte da peça e, em lote, **não** deve ser despejado por caso — surfaceie ao final apenas as
-lacunas/pendências (`[CONFERIR: ...]`).
+Produza **sempre**, antes de redigir a peça, o bloco abaixo. Ele **não integra a peça final**:
+
+```
+ANÁLISE PRELIMINAR (não integra a peça)
+
+Indiciados: {{Nome completo}} — qualificado a fls. {{X}}
+Vítimas: {{Nome ou descrição}}
+Fato e capitulação: {{síntese}} / {{dispositivo(s) violado(s) — um por conduta/vítima}} / concurso ({{Sim — modalidade}} ou Não)
+Provas relevantes: {{laudo / auto / foto / vídeo — fls. X}}
+Depoimentos: {{Nome}} (fls. {{X}}): {{resumo em até 2 parágrafos}}
+Rol de testemunhas: {{Nome}} — {{categoria}} — fls. {{X}}
+Trecho(s) recuperado(s) e origem: {{entrada(s) de exemplos/indice.md cujo trecho foi recuperado}} — aderência ao caso (tipo penal / modus operandi) ou "material recuperado não aderente"
+Lacunas: {{descrever ou "Nenhuma"}}
+```
+
+Ao processar um **único** caso, apresente esse bloco ao usuário antes do texto da denúncia. Em
+**lote** (vários casos), não despeje o bloco completo por peça — informe ao final, por peça, apenas
+qual entrada de `exemplos/` foi usada como referência e as lacunas/pendências.
+
+## Seleção de casos (lote idempotente)
+
+Esta skill opera **em lote e de forma idempotente**, conforme o padrão do projeto:
+
+- Se o usuário apontou arquivo(s) específico(s), use-os (garantindo o `md/<base>.md`
+  correspondente — extraia-o antes, se faltar).
+- Caso contrário, liste os casos cujo **`output/<base>-denuncia.md` ainda não exista** e redija um
+  para cada `md/<base>.md`.
+- A idempotência é aferida contra o sufixo **`-denuncia`** — nunca contra `output/<base>.md`
+  (relatório do `esquematizar-processos`, quando existir): esta skill não depende dele e não deve
+  tratá-lo como concorrente nem sobrescrevê-lo.
 
 ## Redação e saída
 
 1. **Leia `templates/denuncia.md` imediatamente antes de redigir** e preencha cada campo com dado
-   extraído do relatório, ancorando os fatos em `(fls. XX)`. Identifique rito, concurso e reparação
-   a partir do crime real apurado.
+   extraído do `md/<base>.md`, ancorando os fatos em `(fls. XX)`. Identifique rito, concurso e
+   reparação a partir do crime real apurado.
 2. Salve a peça em `output/<base>-denuncia.md` (nome-base da origem + sufixo `-denuncia`), com os
    placeholders substituídos por texto corrido, sem chaves nem marcações visíveis. Se a pasta
    `output/` não existir ou não for acessível, gere o `.md` para download.
-3. Se o usuário apontou um **único** caso, apresente também a peça completa na resposta. Em lote com
-   vários casos, **não** despeje todas as peças — apenas salve e resuma.
+3. Se o usuário apontou um **único** caso, apresente a análise preliminar e a peça completa na
+   resposta. Em lote com vários casos, **não** despeje análise nem peças por caso — apenas salve e
+   resuma.
 4. Ao final, informe quantos casos foram processados, quantos foram ignorados (já tinham
-   `-denuncia.md`) e os nomes das peças geradas; liste as pendências `[CONFERIR: ...]` indicando a
-   qual peça cada uma pertence.
+   `-denuncia.md`) e os nomes das peças geradas; liste as pendências ("NÃO CONSTA NOS AUTOS")
+   indicando a qual peça cada uma pertence.
 5. Entregue **apenas o texto da denúncia** (em prosa, pronto para colar). **Só gere outro formato
    (`.docx`/`.pdf`) se o usuário pedir explicitamente.**

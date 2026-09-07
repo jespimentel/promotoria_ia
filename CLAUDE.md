@@ -38,10 +38,11 @@ Todas leem o texto em `md/<base>.md`. Quanto à **saída** no `output/` plano, n
 (nome-base = número CNJ do processo) vale a regra (ver "Restrição do `output/` plano"):
 
 - **`esquematizar-processos`** grava no **nome-base puro** `output/<base>.md` — é o relatório
-  canônico dos autos, consumido pela `denuncia`.
+  canônico dos autos.
 - **`analisar-flagrante`, `alegacoes-finais`, `denuncia`** gravam com **sufixo próprio**
   `output/<base>-<nome-da-skill>.md` (`-flagrante`, `-alegacoes-finais`, `-denuncia`), convivendo
-  com aquele relatório no mesmo nome-base.
+  com aquele relatório no mesmo nome-base quando ele existir. Nenhuma delas depende do relatório do
+  `esquematizar-processos` — todas leem apenas `md/<base>.md`.
 - **`resumidor-pecas`** é um **fluxo à parte** (triagem de peças avulsas, nome-base = nome da peça,
   não o número do processo): grava `output/<peça>.md` + um `indice.md` consolidado; não colide com
   o fluxo dos autos.
@@ -58,10 +59,12 @@ Todas leem o texto em `md/<base>.md`. Quanto à **saída** no `output/` plano, n
 - **`analisar-flagrante`** (`.claude/skills/analisar-flagrante/`) — analisa autos de prisão
   em flagrante e gera um relatório estruturado por auto. Grava `output/<base>-flagrante.md`
   (sufixo, não o nome-base puro — ver Convenções).
-- **`denuncia`** (`.claude/skills/denuncia/`) — **etapa opcional** (segunda etapa) que redige a
-  denúncia criminal a partir do relatório esquemático (`output/<base>.md`, fonte primária das
-  `fls.`), usando `md/<base>.md` só para conferir números e como fallback. Só roda a **pedido
-  expresso**. Grava `output/<base>-denuncia.md` (sufixo, não o nome-base puro — ver Convenções).
+- **`denuncia`** (`.claude/skills/denuncia/`) — **autônoma**: redige a denúncia criminal com base
+  exclusiva no texto do auto em `md/<base>.md`, sem depender do relatório do
+  `esquematizar-processos`. Usa as denúncias reais em `.claude/skills/denuncia/exemplos/`
+  (indexadas em `exemplos/indice.md`, para disclosure progressivo) só como referência de forma e
+  estilo. Só roda a **pedido expresso**. Grava `output/<base>-denuncia.md` (sufixo, não o
+  nome-base puro — ver Convenções).
 - **`esquematizar-processos`** (`.claude/skills/esquematizar-processos/`) — esquematiza autos
   de um processo e gera um relatório esquemático `.md` (resumo do fato, pessoas e suas ações,
   provas técnicas com `fls.`, linha do tempo e análise de confiança).
